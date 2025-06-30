@@ -32,25 +32,27 @@ This is a decentralized CDN prototype built on the **Internet Computer (ICP)** u
 ## 🛠️ Installation & Dev Setup
 
 ```bash
-# Clone the repo
+# 📦 Clone the repository
 git clone https://github.com/<your-username>/icp_cdn.git
 cd icp_cdn
 
-# Install frontend dependencies
+# 📁 Install frontend dependencies
 cd src/icp_cdn_frontend
 npm install
 
-# .dfx/, node_modules/, and src/declarations/ are ignored via .gitignore
-#After deployment, Go back and generate bindings
+# 🔒 Note: `.dfx/`, `node_modules/`, and `src/declarations/` are git-ignored by default.
+
+# 🔁 Go back and generate backend/frontend bindings
 cd ../..
 dfx generate
 
-# Start local Internet Computer replica
+# 🚀 Start local Internet Computer replica
 dfx start --background
 
-#Deploy backend + frontend
+# 📡 Deploy backend + frontend canisters
 dfx deploy
 
-# Run frontend dev server
+# 💻 Run the frontend development server
 cd src/icp_cdn_frontend
 npm run dev
+
