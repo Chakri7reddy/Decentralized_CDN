@@ -13,7 +13,7 @@
 
 ## 🛠️ Installation & Dev Setup
 
-```bash
+
 # Clone the repo
 git clone https://github.com/<your-username>/icp_cdn.git
 cd icp_cdn
@@ -25,3 +25,14 @@ npm install
 # Go back and generate bindings
 cd ../..
 dfx generate
+
+--
+# Start local Internet Computer replica
+dfx start --background
+
+#Deploy backend + frontend
+dfx deploy
+
+# Run frontend dev server
+cd src/icp_cdn_frontend
+npm run dev
