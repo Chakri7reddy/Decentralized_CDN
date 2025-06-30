@@ -41,6 +41,16 @@ cd src/icp_cdn_frontend
 npm install
 
 # .dfx/, node_modules/, and src/declarations/ are ignored via .gitignore
-After deployment, Go back and generate bindings
+#After deployment, Go back and generate bindings
 cd ../..
 dfx generate
+
+# Start local Internet Computer replica
+dfx start --background
+
+#Deploy backend + frontend
+dfx deploy
+
+# Run frontend dev server
+cd src/icp_cdn_frontend
+npm run dev
