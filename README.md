@@ -1,3 +1,24 @@
+# 📦 Decentralized Content Delivery Network (CDN) on Internet Computer
+
+This is a decentralized CDN prototype built on the **Internet Computer (ICP)** using:
+
+- 🦀 Rust (for backend)
+- ⚛️ React + Tailwind CSS (for frontend)
+- 📁 ICP Asset Canisters (for static file hosting)
+
+---
+
+## 🚀 Features (Current)
+
+- Upload and retrieve file chunks from Rust backend
+- React UI with Tailwind styling
+- Integrated with DFX for full local development
+- Live canister calls using `@dfinity/agent`
+
+---
+
+## 📁 Project Structure
+
 ## ⚙️ Getting Started
 
 > 🧠 **Prerequisites**:
@@ -19,6 +40,7 @@ cd icp_cdn
 cd src/icp_cdn_frontend
 npm install
 
-# Go back and generate bindings
+# .dfx/, node_modules/, and src/declarations/ are ignored via .gitignore
+After deployment, Go back and generate bindings
 cd ../..
 dfx generate
