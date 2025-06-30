@@ -6,7 +6,7 @@ This is a decentralized CDN prototype built on the **Internet Computer (ICP)** u
 - ⚛️ React + Tailwind CSS (for frontend)
 - 📁 ICP Asset Canisters (for static file hosting)
 
----
+
 
 ## 🚀 Features (Current)
 
@@ -15,7 +15,7 @@ This is a decentralized CDN prototype built on the **Internet Computer (ICP)** u
 - Integrated with DFX for full local development
 - Live canister calls using `@dfinity/agent`
 
----
+
 
 ## 📁 Project Structure
 
@@ -27,7 +27,7 @@ This is a decentralized CDN prototype built on the **Internet Computer (ICP)** u
 - [Install Node.js](https://nodejs.org/)
 - Optional: VSCode with Rust/TS support
 
----
+
 
 ## 🛠️ Installation & Dev Setup
 
