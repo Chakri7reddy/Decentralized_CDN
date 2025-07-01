@@ -1,5 +1,5 @@
 service : {
-  upload_chunk: (text, vec nat8) -> ();
-  get_chunk: (text) -> (vec nat8);
-  greet: (text) -> (text);
+  upload_file : (text, vec nat8) -> ();
+  get_file: (text) -> (vec nat8);
+ list_files:() -> (vec text);
 };

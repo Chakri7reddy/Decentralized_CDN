@@ -1,87 +1,114 @@
-import { useState } from 'react';
-import { icp_cdn_backend } from 'declarations/icp_cdn_backend';
-import logo from './logo2.svg';
-import './index.css';
+import { useEffect, useState } from "react";
+import { icp_cdn_backend } from "declarations/icp_cdn_backend";
 
 function App() {
-  const [greeting, setGreeting] = useState('');
   const [file, setFile] = useState(null);
-  const [status, setStatus] = useState('');
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    icp_cdn_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-  }
-
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
+  const [files, setFiles] = useState([]);
+  const [status, setStatus] = useState("");
 
   const handleUpload = async () => {
-    if (!file) return alert('No file selected');
+    if (!file) {
+      setStatus("⚠ Please select a file.");
+      return;
+    }
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const chunk = [...new Uint8Array(arrayBuffer)];
+      const bytes = [...new Uint8Array(arrayBuffer)];
 
-      setStatus('Uploading...');
-      await icp_cdn_backend.upload_chunk(file.name, chunk);
-      setStatus('✅ Upload successful!');
-    } catch (err) {
-      console.error(err);
-      setStatus('❌ Upload failed.');
+      setStatus("⏳ Uploading...");
+      await icp_cdn_backend.upload_file(file.name, bytes);
+      setStatus("✅ File uploaded!");
+      setFile(null);
+      fetchFiles();
+    } catch (error) {
+      console.error(error);
+      setStatus("❌ Upload failed.");
     }
   };
 
+  const fetchFiles = async () => {
+    try {
+      const list = await icp_cdn_backend.list_files();
+      setFiles(list);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDownload = async (name) => {
+    try {
+      const bytes = await icp_cdn_backend.get_file(name);
+      const blob = new Blob([new Uint8Array(bytes)]);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = name;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
   return (
-    <main className="text-center px-4 py-6">
-      <img src={logo} alt="DFINITY logo" className="mx-auto w-48" />
-      <h1 className="text-3xl font-bold my-4">Hello from the Decentralized CDN!</h1>
-      <h1 className="text-blue-500 text-3xl font-bold underline">Tailwind Test Heading</h1>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 p-6 font-sans">
+      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h1 className="text-3xl font-bold text-indigo-700 text-center mb-6">
+          Decentralized CDN Dashboard
+        </h1>
 
-      <div className="bg-lime-200 text-red-500 p-6 my-4">
-        <p className="text-blue-500">This should be blue!</p>
+        <div className="border border-dashed border-gray-400 rounded-lg p-6 mb-4 bg-gray-50">
+          <label className="block mb-2 text-gray-700 font-medium">
+            Select File to Upload
+          </label>
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="w-full border p-2 rounded text-sm mb-4"
+          />
+          <button
+            onClick={handleUpload}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition"
+          >
+            Upload
+          </button>
+          <p className="mt-2 text-sm text-gray-600">{status}</p>
+        </div>
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Uploaded Files
+          </h2>
+          {files.length > 0 ? (
+            <ul className="space-y-2">
+              {files.map((file, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded shadow-sm hover:bg-gray-200 transition"
+                >
+                  <span className="text-gray-700 truncate max-w-xs">
+                    {file}
+                  </span>
+                  <button
+                    onClick={() => handleDownload(file)}
+                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                  >
+                    Download
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">No files uploaded yet.</p>
+          )}
+        </div>
       </div>
-
-      {/* 🔹 File Upload Section */}
-      <section className="mb-6">
-        <input type="file" onChange={handleFileChange} className="mb-2" />
-        <button
-          onClick={handleUpload}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Upload File
-        </button>
-        <p className="mt-2 text-sm text-gray-500">{status}</p>
-      </section>
-
-      {/* 🔹 Greet Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-wrap justify-center items-baseline gap-2 max-w-xl mx-auto"
-      >
-        <label htmlFor="name">Enter your name:</label>
-        <input id="name" type="text" className="border p-2 rounded" />
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Click Me!
-        </button>
-      </form>
-
-      {greeting && (
-        <section
-          id="greeting"
-          className="mt-6 border border-gray-800 p-4 max-w-md mx-auto"
-        >
-          {greeting}
-        </section>
-      )}
-    </main>
+    </div>
   );
 }
 
