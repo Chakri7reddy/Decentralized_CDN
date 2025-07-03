@@ -1,0 +1,6 @@
+service : {
+  upload_file : (text, vec nat8) -> ();
+  get_file: (text) -> (vec nat8);
+ list_files:() -> (vec text);
+ delete_file: (text) -> ();
+};
