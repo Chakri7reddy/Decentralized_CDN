@@ -1,4 +1,4 @@
-use ic_cdk::query;
+use ic_cdk::query; 
 use ic_cdk::update;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -30,4 +30,11 @@ fn list_files() -> Vec<String> {
     FILES.with(|store| {
         store.borrow().keys().cloned().collect()
     })
+}
+
+#[update]
+fn delete_file(id: String) {
+    FILES.with(|store| {
+        store.borrow_mut().remove(&id);
+    });
 }

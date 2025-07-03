@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
-import { icp_cdn_backend } from "declarations/icp_cdn_backend";
+import { icp_cdn_backend } from "../../declarations/icp_cdn_backend";
 
 function App() {
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
   const [status, setStatus] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [previewContent, setPreviewContent] = useState(null);
 
   const handleUpload = async () => {
     if (!file) {
       setStatus("⚠ Please select a file.");
+      return;
+    }
+
+    if (!file.name || file.name.trim() === "") {
+      setStatus("❌ File name is invalid.");
       return;
     }
 
@@ -22,8 +29,8 @@ function App() {
       setFile(null);
       fetchFiles();
     } catch (error) {
-      console.error(error);
-      setStatus("❌ Upload failed.");
+      console.error("Upload error:", error);
+      setStatus(`❌ Upload failed: ${error.message || error}`);
     }
   };
 
@@ -51,13 +58,52 @@ function App() {
     }
   };
 
+  const handlePreview = async (name) => {
+    try {
+      const bytes = await icp_cdn_backend.get_file(name);
+      const uint8 = new Uint8Array(bytes);
+      const blob = new Blob([uint8]);
+      const url = URL.createObjectURL(blob);
+
+      if (name.match(/\.(png|jpg|jpeg|gif)$/i)) {
+        setPreviewContent(<img src={url} alt={name} className="max-h-64 mx-auto" />);
+      } else if (name.match(/\.(txt|md|js|json|log|html|css)$/i)) {
+        const text = await blob.text();
+        setPreviewContent(
+          <pre className="whitespace-pre-wrap max-h-64 overflow-y-auto bg-gray-200 p-2 rounded">{text}</pre>
+        );
+      } else {
+        setPreviewContent(<p className="text-sm text-gray-500 text-center">📄 Cannot preview this file type.</p>);
+      }
+    } catch (error) {
+      console.error("Preview error:", error);
+      setPreviewContent(<p className="text-red-500">Failed to load preview.</p>);
+    }
+  };
+
+  const handleDelete = async (name) => {
+    try {
+      await icp_cdn_backend.delete_file(name);
+      fetchFiles();
+      setPreviewContent(null);
+      setStatus(`🗑 ${name} deleted`);
+    } catch (error) {
+      console.error("Delete error:", error);
+      setStatus("❌ Delete failed.");
+    }
+  };
+
   useEffect(() => {
     fetchFiles();
   }, []);
 
+  const filteredFiles = files.filter((name) =>
+    name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 p-6 font-sans">
-      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
         <h1 className="text-3xl font-bold text-indigo-700 text-center mb-6">
           Decentralized CDN Dashboard
         </h1>
@@ -84,27 +130,55 @@ function App() {
           <h2 className="text-xl font-semibold text-gray-800 mb-3">
             Uploaded Files
           </h2>
-          {files.length > 0 ? (
-            <ul className="space-y-2">
-              {files.map((file, idx) => (
+
+          <input
+            type="text"
+            placeholder="Search files..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full mb-4 px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+
+          {filteredFiles.length > 0 ? (
+            <ul className="space-y-3">
+              {filteredFiles.map((file, idx) => (
                 <li
                   key={idx}
                   className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded shadow-sm hover:bg-gray-200 transition"
                 >
-                  <span className="text-gray-700 truncate max-w-xs">
-                    {file}
-                  </span>
-                  <button
-                    onClick={() => handleDownload(file)}
-                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                  >
-                    Download
-                  </button>
+                  <span className="text-gray-700 truncate max-w-xs">{file}</span>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => handleDownload(file)}
+                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => handlePreview(file)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Preview
+                    </button>
+                    <button
+                      onClick={() => handleDelete(file)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-gray-500">No files uploaded yet.</p>
+            <p className="text-sm text-gray-500">No files match your search.</p>
+          )}
+
+          {previewContent && (
+            <div className="mt-6 border-t pt-4">
+              <h3 className="text-lg font-semibold mb-2">File Preview</h3>
+              <div className="bg-gray-100 p-4 rounded">{previewContent}</div>
+            </div>
           )}
         </div>
       </div>
