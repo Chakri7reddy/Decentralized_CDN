@@ -35,15 +35,20 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>🚀 CDN dApp</h1>
+    <div className="container maxContainer">
+      <div className="navbar">
+        <div className="nav-title">🚀 CDN dApp</div>
+        {principal && (
+          <button className="logoutBtn" onClick={handleLogout}>Logout</button>
+        )}
+      </div>
+
       {!principal ? (
-        <Login onLogin={handleLogin} />
+        <div className="centered">
+          <Login onLogin={handleLogin} />
+        </div>
       ) : (
-        <>
-          <button onClick={handleLogout}>Logout</button>
-          <Profile principal={principal} />
-        </>
+        <Profile principal={principal} />
       )}
     </div>
   );
